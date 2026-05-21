@@ -38,6 +38,9 @@ Enable Opencode to authenticate against **Antigravity** (Google's IDE) via OAuth
 
 ## Installation
 
+Fork-local changes are documented in [INSTALL-FORK.md](INSTALL-FORK.md). The
+upstream npm package instructions below do not install this fork.
+
 <details open>
 <summary><b>For Humans</b></summary>
 
