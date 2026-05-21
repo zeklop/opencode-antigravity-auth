@@ -6,6 +6,11 @@
  */
 
 import type { ResolvedModel, ThinkingTier, GoogleSearchConfig } from "./types";
+import {
+  resolveAntigravityRegistryRoute,
+  resolveGeminiCliRegistryModel,
+  type ModelThinkingLevel,
+} from "../models/registry";
 
 export interface ModelResolverOptions {
   cli_first?: boolean;
@@ -137,6 +142,10 @@ function isGemini3FlashModel(model: string): boolean {
   return GEMINI_3_FLASH_REGEX.test(model);
 }
 
+function toModelThinkingLevel(tier: ThinkingTier | undefined): ModelThinkingLevel | undefined {
+  return tier;
+}
+
 /**
  * Resolves a model name with optional tier suffix and quota prefix to its actual API model name
  * and corresponding thinking configuration.
@@ -184,8 +193,13 @@ export function resolveModelWithTier(requestedModel: string, options: ModelResol
   const isGemini3Flash = isGemini3FlashModel(modelWithoutQuota);
   
   let antigravityModel = modelWithoutQuota;
+  let registryDefaultThinkingLevel: ModelThinkingLevel | undefined;
   if (skipAlias) {
-    if (isGemini3Pro && !tier && !isImageModel) {
+    const registryRoute = resolveAntigravityRegistryRoute(baseName, toModelThinkingLevel(tier));
+    if (registryRoute) {
+      antigravityModel = registryRoute.actualModel;
+      registryDefaultThinkingLevel = registryRoute.defaultThinkingLevel;
+    } else if (isGemini3Pro && !tier && !isImageModel) {
       antigravityModel = `${modelWithoutQuota}-low`;
     } else if (isGemini3Flash && tier) {
       antigravityModel = baseName;
@@ -220,7 +234,7 @@ export function resolveModelWithTier(requestedModel: string, options: ModelResol
     if (isEffectiveGemini3) {
       return {
         actualModel: resolvedModel,
-        thinkingLevel: "low",
+        thinkingLevel: registryDefaultThinkingLevel ?? "low",
         isThinkingModel: true,
         quotaPreference,
         explicitQuota,
@@ -254,7 +268,7 @@ export function resolveModelWithTier(requestedModel: string, options: ModelResol
 
   const budgetFamily = getBudgetFamily(resolvedModel);
   const budgets = THINKING_TIER_BUDGETS[budgetFamily];
-  const thinkingBudget = budgets[tier];
+  const thinkingBudget = tier === "minimal" ? undefined : budgets[tier];
 
   return {
     actualModel: resolvedModel,
@@ -324,12 +338,16 @@ export function resolveModelForHeaderStyle(
       .replace(/-preview$/i, "")
       .replace(/^antigravity-/i, "");
     
+    const tier = extractThinkingTierFromModel(transformedModel);
+    const baseModel = tier ? transformedModel.replace(TIER_REGEX, "") : transformedModel;
     const isGemini3Pro = isGemini3ProModel(transformedModel);
-    const hasTierSuffix = /-(low|medium|high)$/i.test(transformedModel);
+    const hasTierSuffix = /-(minimal|low|medium|high)$/i.test(transformedModel);
     const isImageModel = IMAGE_GENERATION_MODELS.test(transformedModel);
+    const registryRoute = resolveAntigravityRegistryRoute(baseModel, toModelThinkingLevel(tier));
     
-    // Don't add tier suffix to image models - they don't support thinking
-    if (isGemini3Pro && !hasTierSuffix && !isImageModel) {
+    // Don't add tier suffix to image models - they don't support thinking.
+    // Registry-routed models carry their backend id there instead.
+    if (!registryRoute && isGemini3Pro && !hasTierSuffix && !isImageModel) {
       transformedModel = `${transformedModel}-low`;
     }
     
@@ -340,10 +358,15 @@ export function resolveModelForHeaderStyle(
   if (headerStyle === "gemini-cli") {
     let transformedModel = requestedModel
       .replace(/^antigravity-/i, "")
-      .replace(/-(low|medium|high)$/i, "");
+      .replace(/-(minimal|low|medium|high)$/i, "");
+
+    const registryModel = resolveGeminiCliRegistryModel(transformedModel);
+    if (registryModel) {
+      transformedModel = registryModel;
+    }
 
     const hasPreviewSuffix = /-preview($|-)/i.test(transformedModel);
-    if (!hasPreviewSuffix) {
+    if (!registryModel && !hasPreviewSuffix) {
       transformedModel = `${transformedModel}-preview`;
     }
     

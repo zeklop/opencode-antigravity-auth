@@ -32,3 +32,6 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Verify runtime import
+        run: node -e "import('./dist/index.js')"

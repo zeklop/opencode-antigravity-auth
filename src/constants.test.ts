@@ -1,9 +1,16 @@
 import { describe, it, expect } from "vitest"
 import {
+  ANTIGRAVITY_VERSION_FALLBACK,
   GEMINI_CLI_HEADERS,
   getRandomizedHeaders,
   type HeaderSet,
 } from "./constants.ts"
+
+describe("ANTIGRAVITY_VERSION_FALLBACK", () => {
+  it("uses the currently accepted Antigravity desktop version", () => {
+    expect(ANTIGRAVITY_VERSION_FALLBACK).toBe("2.0.1")
+  })
+})
 
 describe("GEMINI_CLI_HEADERS", () => {
   it("matches Code Assist headers from opencode-gemini-auth", () => {

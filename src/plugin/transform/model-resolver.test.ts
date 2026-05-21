@@ -116,6 +116,21 @@ describe("resolveModelWithTier", () => {
       expect(result.actualModel).toBe("gemini-3.1-pro-low");
       expect(result.thinkingLevel).toBe("low");
     });
+
+    it("antigravity-gemini-3.5-flash gets the deployed backend id and minimal thinking by default", () => {
+      const result = resolveModelWithTier("antigravity-gemini-3.5-flash");
+      expect(result.actualModel).toBe("gemini-3.5-flash-low");
+      expect(result.thinkingLevel).toBe("minimal");
+      expect(result.quotaPreference).toBe("antigravity");
+      expect(result.explicitQuota).toBe(true);
+    });
+
+    it("antigravity-gemini-3.5-flash-high keeps the stable backend id and uses high thinking", () => {
+      const result = resolveModelWithTier("antigravity-gemini-3.5-flash-high");
+      expect(result.actualModel).toBe("gemini-3.5-flash-low");
+      expect(result.thinkingLevel).toBe("high");
+      expect(result.tier).toBe("high");
+    });
   });
 
   describe("Claude thinking models default budget", () => {
@@ -284,6 +299,13 @@ describe("Issue #103: resolveModelForHeaderStyle", () => {
       expect(result.actualModel).toBe("gemini-3.1-pro-low");
       expect(result.quotaPreference).toBe("antigravity");
     });
+
+    it("transforms gemini-3.5-flash to deployed Antigravity backend id", () => {
+      const result = resolveModelForHeaderStyle("gemini-3.5-flash", "antigravity");
+      expect(result.actualModel).toBe("gemini-3.5-flash-low");
+      expect(result.thinkingLevel).toBe("minimal");
+      expect(result.quotaPreference).toBe("antigravity");
+    });
   });
 
   describe("quota fallback from antigravity to gemini-cli", () => {
@@ -308,6 +330,12 @@ describe("Issue #103: resolveModelForHeaderStyle", () => {
     it("keeps gemini-3.1-pro-preview-customtools unchanged for gemini-cli", () => {
       const result = resolveModelForHeaderStyle("gemini-3.1-pro-preview-customtools", "gemini-cli");
       expect(result.actualModel).toBe("gemini-3.1-pro-preview-customtools");
+      expect(result.quotaPreference).toBe("gemini-cli");
+    });
+
+    it("uses bare gemini-3.5-flash for Gemini CLI instead of adding preview", () => {
+      const result = resolveModelForHeaderStyle("antigravity-gemini-3.5-flash", "gemini-cli");
+      expect(result.actualModel).toBe("gemini-3.5-flash");
       expect(result.quotaPreference).toBe("gemini-cli");
     });
   });
