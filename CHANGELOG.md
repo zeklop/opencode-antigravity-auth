@@ -8,6 +8,7 @@
 - Added `antigravity-gemini-3.5-flash` with Antigravity backend id `gemini-3.5-flash-low` and default `minimal` thinking.
 - Added `gemini-3.5-flash` as a Gemini CLI route.
 - Added runtime ESM import verification to CI.
+- Added a built-in non-interactive quota CLI backed by plugin OAuth storage.
 
 ### Changed
 

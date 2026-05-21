@@ -49,3 +49,4 @@ node -e "import('./dist/index.js')"
 - `src/plugin/config/models.ts` is generated from the registry at runtime.
 - `src/plugin/transform/model-resolver.ts` uses registry routes for model backend ids.
 - `src/plugin/request.ts` injects default Gemini 3 thinking config for wrapped and unwrapped requests.
+- `src/quota-cli.ts` reports live and cached quota data from plugin OAuth storage.

@@ -253,6 +253,13 @@ opencode auth login  # Run again to add more accounts
 - **Check quotas** — View remaining API quota for each account
 - **Manage accounts** — Enable/disable specific accounts for rotation
 
+For a non-interactive quota report from the same plugin OAuth storage, build the
+plugin and run:
+
+```bash
+node dist/src/quota-cli.js
+```
+
 For details on load balancing, dual quota pools, and account storage, see [docs/MULTI-ACCOUNT.md](docs/MULTI-ACCOUNT.md).
 
 ---
