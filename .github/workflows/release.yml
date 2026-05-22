@@ -15,12 +15,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
@@ -165,14 +165,15 @@ jobs:
 
       - name: Create GitHub release
         if: steps.determine.outputs.changed == 'true' && steps.determine.outputs.tag_exists == 'false'
-        uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ steps.determine.outputs.current_version }}
-          release_name: v${{ steps.determine.outputs.current_version }}
-          body: ${{ steps.release_notes.outputs.body }}
-          generate_release_notes: false
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_BODY: ${{ steps.release_notes.outputs.body }}
+        run: |
+          set -euo pipefail
+          printf "%s\n" "$RELEASE_BODY" | gh release create "v${{ steps.determine.outputs.current_version }}" \
+            --title "v${{ steps.determine.outputs.current_version }}" \
+            --notes-file - \
+            --verify-tag
 
       - name: Publish to npm
         if: steps.determine.outputs.changed == 'true' && steps.determine.outputs.tag_exists == 'false'

@@ -22,12 +22,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org
@@ -185,15 +185,15 @@ jobs:
           } >>"$GITHUB_OUTPUT"
 
       - name: Create GitHub release
-        uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ github.event.inputs.version }}
-          release_name: v${{ github.event.inputs.version }}
-          body: ${{ steps.release_notes.outputs.body }}
-          draft: false
-          prerelease: false
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_BODY: ${{ steps.release_notes.outputs.body }}
+        run: |
+          set -euo pipefail
+          printf "%s\n" "$RELEASE_BODY" | gh release create "v${{ github.event.inputs.version }}" \
+            --title "v${{ github.event.inputs.version }}" \
+            --notes-file - \
+            --verify-tag
 
       - name: Summary
         run: |

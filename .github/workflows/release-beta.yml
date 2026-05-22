@@ -18,13 +18,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org
@@ -223,15 +223,16 @@ jobs:
 
       - name: Create GitHub pre-release
         if: steps.should_publish.outputs.should_publish == 'true'
-        uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ steps.determine.outputs.next_version }}
-          release_name: v${{ steps.determine.outputs.next_version }} (Beta)
-          body: ${{ steps.release_notes.outputs.body }}
-          prerelease: true
-          draft: false
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_BODY: ${{ steps.release_notes.outputs.body }}
+        run: |
+          set -euo pipefail
+          printf "%s\n" "$RELEASE_BODY" | gh release create "v${{ steps.determine.outputs.next_version }}" \
+            --title "v${{ steps.determine.outputs.next_version }} (Beta)" \
+            --notes-file - \
+            --verify-tag \
+            --prerelease
 
       - name: Publish to npm with beta tag
         if: steps.should_publish.outputs.should_publish == 'true'
