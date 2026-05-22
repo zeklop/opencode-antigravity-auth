@@ -36,6 +36,14 @@ Enable Opencode to authenticate against **Antigravity** (Google's IDE) via OAuth
 
 ---
 
+## Security Note
+
+The Google OAuth client ID and installed-app client secret in this fork are
+inherited from the upstream plugin and are used by its desktop OAuth flow.
+They are not OpenCode account tokens, refresh tokens, or npm credentials.
+
+---
+
 ## Installation
 
 Fork-local changes are documented in [INSTALL-FORK.md](INSTALL-FORK.md). Use
