@@ -4,8 +4,8 @@ Use this path when you need the changes maintained in
 `zeklop/opencode-antigravity-auth`.
 
 `opencode-antigravity-auth@latest` is the upstream npm package. It does not
-install this fork. Until the scoped fork package has its first npm release, the
-fork runs from a built local checkout.
+install this fork. Use `@zeklop/opencode-antigravity-auth@latest` for the
+published fork; use a built local checkout for unreleased changes.
 
 ## Install
 
@@ -92,8 +92,7 @@ same.
 
 ## Scoped NPM Path
 
-After the first `@zeklop/opencode-antigravity-auth` npm release, OpenCode can
-install the fork from the scoped package:
+OpenCode can install the published fork from the scoped package:
 
 ```json
 {

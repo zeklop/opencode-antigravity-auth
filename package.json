@@ -11,7 +11,7 @@
         "access": "public"
     },
     "bin": {
-        "opencode-antigravity-quota": "./dist/src/quota-cli.js"
+        "opencode-antigravity-quota": "dist/src/quota-cli.js"
     },
     "repository": {
         "type": "git",

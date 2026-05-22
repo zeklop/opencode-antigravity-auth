@@ -10,7 +10,7 @@ describe("fork package manifest", () => {
     expect(packageJson.name).toBe("@zeklop/opencode-antigravity-auth");
     expect(packageJson.publishConfig).toEqual({ access: "public" });
     expect(packageJson.bin).toEqual({
-      "opencode-antigravity-quota": "./dist/src/quota-cli.js",
+      "opencode-antigravity-quota": "dist/src/quota-cli.js",
     });
   });
 });
