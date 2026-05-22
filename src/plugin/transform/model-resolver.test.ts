@@ -43,20 +43,11 @@ describe("resolveModelWithTier", () => {
     });
   });
 
-  describe("All Gemini models default to antigravity quota", () => {
-    it("gemini-2.5-flash defaults to antigravity", () => {
-      const result = resolveModelWithTier("gemini-2.5-flash");
-      expect(result.quotaPreference).toBe("antigravity");
-    });
-
-    it("gemini-2.5-pro defaults to antigravity", () => {
-      const result = resolveModelWithTier("gemini-2.5-pro");
-      expect(result.quotaPreference).toBe("antigravity");
-    });
-
-    it("gemini-2.0-flash defaults to antigravity", () => {
-      const result = resolveModelWithTier("gemini-2.0-flash");
-      expect(result.quotaPreference).toBe("antigravity");
+  describe("Gemini 2 models", () => {
+    it("rejects unsupported Gemini 2.x requests", () => {
+      expect(() => resolveModelWithTier("gemini-2.5-pro")).toThrow(
+        "Gemini 2.x models are not supported by this fork; use Gemini 3.x",
+      );
     });
   });
 
@@ -242,13 +233,10 @@ describe("resolveModelWithVariant", () => {
       expect(result.configSource).toBe("variant");
     });
 
-    it("uses budget directly for non-Gemini 3 models", () => {
-      const result = resolveModelWithVariant("gemini-2.5-pro", {
+    it("rejects Gemini 2.x models before applying variant config", () => {
+      expect(() => resolveModelWithVariant("gemini-2.5-pro", {
         thinkingBudget: 20000,
-      });
-      expect(result.thinkingBudget).toBe(20000);
-      expect(result.thinkingLevel).toBeUndefined();
-      expect(result.configSource).toBe("variant");
+      })).toThrow("Gemini 2.x models are not supported by this fork; use Gemini 3.x");
     });
   });
 
@@ -341,11 +329,11 @@ describe("Issue #103: resolveModelForHeaderStyle", () => {
   });
 
   describe("no transformation needed", () => {
-    it("keeps gemini-2.5-flash unchanged for both header styles", () => {
-      const antigravity = resolveModelForHeaderStyle("gemini-2.5-flash", "antigravity");
-      const cli = resolveModelForHeaderStyle("gemini-2.5-flash", "gemini-cli");
-      expect(antigravity.actualModel).toBe("gemini-2.5-flash");
-      expect(cli.actualModel).toBe("gemini-2.5-flash");
+    it("rejects Gemini 2.x for both header styles", () => {
+      expect(() => resolveModelForHeaderStyle("gemini-2.5-flash", "antigravity"))
+        .toThrow("Gemini 2.x models are not supported by this fork; use Gemini 3.x");
+      expect(() => resolveModelForHeaderStyle("gemini-2.5-flash", "gemini-cli"))
+        .toThrow("Gemini 2.x models are not supported by this fork; use Gemini 3.x");
     });
 
     it("keeps claude models unchanged (antigravity only)", () => {

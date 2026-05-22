@@ -1,6 +1,6 @@
 {
     "name": "@zeklop/opencode-antigravity-auth",
-    "version": "1.6.0",
+    "version": "1.6.1",
     "description": "OpenCode OAuth plugin for Antigravity and Gemini models",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",

@@ -262,12 +262,9 @@ export function aggregateGeminiCliQuota(response: RetrieveUserQuotaResponse): Ge
       continue;
     }
     
-    // Filter out models we don't care about for Gemini CLI quotas.
-    // Show the Gemini 3 family and gemini-2.5-pro premium buckets.
+    // Filter out models outside this fork's supported Gemini 3 surface.
     const modelId = bucket.modelId;
-    const isRelevantModel =
-      modelId.startsWith("gemini-3") ||
-      modelId === "gemini-2.5-pro";
+    const isRelevantModel = modelId.startsWith("gemini-3");
     
     if (!isRelevantModel) {
       continue;

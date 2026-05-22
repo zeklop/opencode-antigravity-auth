@@ -2,10 +2,12 @@ import type { AccountQuotaResult, QuotaGroup, QuotaGroupSummary } from "./quota"
 import type { AccountMetadataV3, AccountStorageV4 } from "./storage";
 
 const QUOTA_LABELS: Array<[QuotaGroup, string]> = [
-  ["claude", "Claude"],
-  ["gemini-pro", "Gemini 3 Pro"],
-  ["gemini-flash", "Gemini 3 Flash"],
+  ["gemini-flash", "gemini-flash"],
+  ["gemini-pro", "gemini-pro"],
+  ["claude", "claude"],
 ];
+
+type Status = "healthy" | "warning" | "critical" | "unknown";
 
 function maskEmail(email?: string): string {
   if (!email || !email.includes("@")) {
@@ -16,38 +18,57 @@ function maskEmail(email?: string): string {
   return `${local?.slice(0, 1) || "*"}***@${domain}`;
 }
 
-function formatPercent(value?: number): string {
+function clampFraction(value?: number): number | undefined {
   if (typeof value !== "number" || !Number.isFinite(value)) {
-    return "unknown";
+    return undefined;
   }
 
-  return `${Math.round(Math.max(0, Math.min(1, value)) * 100)}%`;
+  return Math.max(0, Math.min(1, value));
 }
 
-function formatAge(timestamp: number | undefined, now: number): string {
-  if (!timestamp || !Number.isFinite(timestamp)) {
-    return "unknown";
-  }
-
-  const elapsed = Math.max(0, now - timestamp);
-  if (elapsed < 60_000) {
-    return "just now";
-  }
-
-  const minutes = Math.floor(elapsed / 60_000);
-  if (minutes < 60) {
-    return `${minutes}m ago`;
-  }
-
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) {
-    return `${hours}h ago`;
-  }
-
-  return `${Math.floor(hours / 24)}d ago`;
+function formatPercent(value?: number): string {
+  const fraction = clampFraction(value);
+  return fraction === undefined ? "???" : `${Math.round(fraction * 100)}%`;
 }
 
-function formatReset(resetTime?: string): string {
+function formatBar(value?: number, width = 20): string {
+  const fraction = clampFraction(value);
+  if (fraction === undefined) {
+    return `${"░".repeat(width)} ???`;
+  }
+
+  const filled = Math.round(fraction * width);
+  return `${"█".repeat(filled)}${"░".repeat(width - filled)} ${formatPercent(fraction)}`;
+}
+
+function formatDate(timestamp: number | string | undefined): string {
+  const value = typeof timestamp === "string" ? Date.parse(timestamp) : timestamp;
+  if (!value || !Number.isFinite(value)) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat("ru-RU", {
+    timeZone: "Europe/Moscow",
+    dateStyle: "short",
+    timeStyle: "medium",
+  }).format(new Date(value));
+}
+
+function formatDuration(ms: number): string {
+  const totalMinutes = Math.max(1, Math.ceil(ms / 60_000));
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+  const parts: string[] = [];
+
+  if (days) parts.push(`${days}d`);
+  if (hours) parts.push(`${hours}h`);
+  if (!days && minutes) parts.push(`${minutes}m`);
+
+  return parts.join(" ") || `${totalMinutes}m`;
+}
+
+function formatReset(resetTime: string | undefined, now: number): string {
   if (!resetTime) {
     return "";
   }
@@ -57,25 +78,49 @@ function formatReset(resetTime?: string): string {
     return "";
   }
 
-  return `; reset ${new Date(timestamp).toISOString()}`;
+  const remaining = timestamp - now;
+  const duration = remaining > 0 ? ` (${formatDuration(remaining)})` : "";
+  return ` reset: ${formatDate(timestamp)}${duration}`;
 }
 
-function formatQuotaLine(label: string, quota: QuotaGroupSummary): string {
-  return `  ${label}: ${formatPercent(quota.remainingFraction)} remaining${formatReset(quota.resetTime)} (${quota.modelCount} models)`;
+function getStatus(value?: number): Status {
+  const fraction = clampFraction(value);
+  if (fraction === undefined) {
+    return "unknown";
+  }
+  if (fraction <= 0.1) {
+    return "critical";
+  }
+  if (fraction <= 0.3) {
+    return "warning";
+  }
+  return "healthy";
+}
+
+function getStatusMarker(status: Status): string {
+  if (status === "healthy") return "🟢";
+  if (status === "warning") return "🟡";
+  if (status === "critical") return "🔴";
+  return "⚪";
+}
+
+function formatQuotaLine(label: string, quota: QuotaGroupSummary, now: number): string[] {
+  return [
+    `  ${getStatusMarker(getStatus(quota.remainingFraction))} ${label.padEnd(15)}: ${formatBar(quota.remainingFraction)} (${quota.modelCount} models)`,
+    quota.resetTime ? `      Reset: ${formatDate(quota.resetTime)}` : "",
+  ].filter(Boolean);
 }
 
 function formatCachedQuota(account: AccountMetadataV3, now: number): string[] {
+  const lines = ["🎯 Antigravity Plugin Cache:"];
   if (!account.cachedQuota || Object.keys(account.cachedQuota).length === 0) {
-    return ["Cached Antigravity quota: unavailable"];
+    return [...lines, "  unavailable"];
   }
 
-  const lines = [
-    `Cached Antigravity quota: updated ${formatAge(account.cachedQuotaUpdatedAt, now)}`,
-  ];
   for (const [group, label] of QUOTA_LABELS) {
     const quota = account.cachedQuota[group];
     if (quota) {
-      lines.push(formatQuotaLine(label, quota));
+      lines.push(...formatQuotaLine(label, quota, now));
     }
   }
 
@@ -91,56 +136,73 @@ function formatRateLimitName(key: string): string {
   return `${key.slice(0, separator)}/${key.slice(separator + 1)}`;
 }
 
-function formatActiveRateLimits(account: AccountMetadataV3, now: number): string[] {
-  const active = Object.entries(account.rateLimitResetTimes ?? {})
-    .filter(([, resetTime]) => typeof resetTime === "number" && resetTime > now)
-    .sort(([, left], [, right]) => (left ?? 0) - (right ?? 0));
-
-  if (active.length === 0) {
-    return ["Active rate limits: none"];
-  }
-
-  return [
-    "Active rate limits:",
-    ...active.map(([key, resetTime]) =>
-      `  ${formatRateLimitName(key)}: reset ${new Date(resetTime as number).toISOString()}`),
-  ];
-}
-
-function formatGeminiCliQuota(result: AccountQuotaResult | undefined): string[] {
-  const quota = result?.geminiCliQuota;
-  if (result?.status === "error") {
-    return ["Gemini CLI live:", `  error: ${result.error}`];
-  }
-  if (!quota || quota.models.length === 0) {
-    return ["Gemini CLI live:", `  ${quota?.error || "unavailable"}`];
-  }
-
-  return [
-    "Gemini CLI live:",
-    ...quota.models.map((model) =>
-      `  ${model.modelId}: ${formatPercent(model.remainingFraction)} remaining${formatReset(model.resetTime)}`),
-  ];
-}
-
-function formatAntigravityQuota(result: AccountQuotaResult | undefined): string[] {
-  const quota = result?.quota;
-  if (result?.status === "error") {
-    return ["Antigravity live:", `  error: ${result.error}`];
-  }
-  if (!quota || Object.keys(quota.groups).length === 0) {
-    return ["Antigravity live:", `  ${quota?.error || "unavailable"}`];
-  }
-
-  const lines = ["Antigravity live:"];
-  for (const [group, label] of QUOTA_LABELS) {
-    const groupQuota = quota.groups[group];
-    if (groupQuota) {
-      lines.push(formatQuotaLine(label, groupQuota));
+function getActiveRateLimits(account: AccountMetadataV3, now: number): Array<[string, number]> {
+  const active: Array<[string, number]> = [];
+  for (const [key, resetTime] of Object.entries(account.rateLimitResetTimes ?? {})) {
+    if (typeof resetTime === "number" && resetTime > now) {
+      active.push([key, resetTime]);
     }
   }
 
+  return active.sort(([, left], [, right]) => left - right);
+}
+
+function formatActiveRateLimits(account: AccountMetadataV3, now: number): string[] {
+  const active = getActiveRateLimits(account, now);
+  const lines = ["⚡ Active Rate Limits:"];
+  if (active.length === 0) {
+    return [...lines, "  none active"];
+  }
+
+  const names = active.map(([key]) => formatRateLimitName(key));
+  const width = Math.max(...names.map((name) => name.length), 1);
+  for (const [[, resetTime], name] of active.map((rate, index) => [rate, names[index]!] as const)) {
+    lines.push(
+      `  🟡 ${name.padEnd(width)} : ${formatDuration(resetTime - now)}, reset: ${formatDate(resetTime)}`,
+    );
+  }
+
   return lines;
+}
+
+function formatGeminiCliQuota(result: AccountQuotaResult | undefined, now: number): string[] {
+  const quota = result?.geminiCliQuota;
+  const lines = ["", "📊 Gemini CLI:"];
+  if (result?.status === "error") {
+    return [...lines, `    error: ${result.error}`];
+  }
+  if (!quota || quota.models.length === 0) {
+    return [...lines, `    ${quota?.error || "unavailable"}`];
+  }
+
+  const width = Math.max(...quota.models.map((model) => model.modelId.length), 1);
+  for (const model of quota.models) {
+    lines.push(
+      `    ${model.modelId.padEnd(width)} ${formatBar(model.remainingFraction)}${formatReset(model.resetTime, now)}`,
+    );
+  }
+
+  return lines;
+}
+
+function getOverallStatus(account: AccountMetadataV3, now: number): Status {
+  if (getActiveRateLimits(account, now).length > 0) {
+    return "warning";
+  }
+
+  const quotas = Object.values(account.cachedQuota ?? {});
+  if (quotas.length === 0) {
+    return "unknown";
+  }
+
+  if (quotas.some((quota) => getStatus(quota.remainingFraction) === "critical")) {
+    return "critical";
+  }
+  if (quotas.some((quota) => getStatus(quota.remainingFraction) === "warning")) {
+    return "warning";
+  }
+
+  return "healthy";
 }
 
 export function renderQuotaReport(
@@ -149,23 +211,27 @@ export function renderQuotaReport(
   now = Date.now(),
 ): string {
   const lines = [
-    `Antigravity quota report (${new Date(now).toISOString()})`,
+    `Unified Quota Status (${formatDate(now)} MSK)`,
     "=".repeat(60),
   ];
 
   for (const [index, account] of storage.accounts.entries()) {
     const result = results.find((item) => item.index === index);
+    const overallStatus = getOverallStatus(account, now);
 
     lines.push("");
     lines.push(`Account ${index + 1}: ${maskEmail(account.email)}${account.enabled === false ? " (disabled)" : ""}`);
-    if (account.managedProjectId || account.projectId) {
-      lines.push(`Project: ${account.managedProjectId || account.projectId}`);
-    }
     lines.push(...formatCachedQuota(account, now));
     lines.push(...formatActiveRateLimits(account, now));
-    lines.push(...formatGeminiCliQuota(result));
-    lines.push(...formatAntigravityQuota(result));
+    lines.push(...formatGeminiCliQuota(result, now));
+    lines.push("");
+    lines.push(`${getStatusMarker(overallStatus)} Overall Status: ${overallStatus.toUpperCase()}`);
   }
+
+  lines.push("");
+  lines.push("💡 Pro Tips:");
+  lines.push("• Antigravity (🎯) shows quota data cached by opencode-antigravity-auth after plugin OAuth");
+  lines.push("• Gemini CLI (📊) shows live API quota buckets using the same plugin refresh token");
 
   return lines.join("\n");
 }

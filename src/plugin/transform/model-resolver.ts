@@ -157,7 +157,6 @@ function toModelThinkingLevel(tier: ThinkingTier | undefined): ModelThinkingLeve
  * - Claude and image models always use Antigravity
  *
  * Examples:
- * - "gemini-2.5-flash" → { quotaPreference: "antigravity" }
  * - "gemini-3-pro-preview" → { quotaPreference: "antigravity" }
  * - "antigravity-gemini-3-pro-high" → { quotaPreference: "antigravity", explicitQuota: true }
  * - "claude-opus-4-6-thinking-medium" → { quotaPreference: "antigravity" }
@@ -169,6 +168,9 @@ function toModelThinkingLevel(tier: ThinkingTier | undefined): ModelThinkingLeve
 export function resolveModelWithTier(requestedModel: string, options: ModelResolverOptions = {}): ResolvedModel {
   const isAntigravity = QUOTA_PREFIX_REGEX.test(requestedModel);
   const modelWithoutQuota = requestedModel.replace(QUOTA_PREFIX_REGEX, "");
+  if (modelWithoutQuota.toLowerCase().startsWith("gemini-2.")) {
+    throw new Error("Gemini 2.x models are not supported by this fork; use Gemini 3.x");
+  }
 
   const tier = extractThinkingTierFromModel(modelWithoutQuota);
   const baseName = tier ? modelWithoutQuota.replace(TIER_REGEX, "") : modelWithoutQuota;

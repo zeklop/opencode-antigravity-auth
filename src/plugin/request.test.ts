@@ -612,7 +612,7 @@ it("removes x-api-key header", () => {
 
     it("removes x-goog-user-project header for gemini-cli headerStyle", () => {
       const result = prepareAntigravityRequest(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent",
         { method: "POST", body: JSON.stringify({ contents: [] }), headers: { "x-goog-user-project": "my-project" } },
         mockAccessToken,
         mockProjectId,
@@ -668,7 +668,7 @@ it("removes x-api-key header", () => {
 
     it("identifies Gemini models correctly", () => {
       const result = prepareAntigravityRequest(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent",
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent",
         { method: "POST", body: JSON.stringify({ contents: [] }) },
         mockAccessToken,
         mockProjectId
@@ -971,12 +971,12 @@ it("removes x-api-key header", () => {
 
     it("returns requestedModel matching URL model", () => {
       const result = prepareAntigravityRequest(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent",
         { method: "POST", body: JSON.stringify({ contents: [] }) },
         mockAccessToken,
         mockProjectId
       );
-      expect(result.requestedModel).toBe("gemini-2.5-flash");
+      expect(result.requestedModel).toBe("gemini-3-flash");
     });
 
     it("handles empty body gracefully", () => {
@@ -1001,7 +1001,7 @@ it("removes x-api-key header", () => {
 
     it("removes contents entries with empty or invalid parts", () => {
       const result = prepareAntigravityRequest(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent",
         {
           method: "POST",
           body: JSON.stringify({
@@ -1033,7 +1033,7 @@ it("removes x-api-key header", () => {
 
     it("drops systemInstruction when all parts are invalid", () => {
       const result = prepareAntigravityRequest(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent",
         {
           method: "POST",
           body: JSON.stringify({
@@ -1187,16 +1187,15 @@ it("removes x-api-key header", () => {
         expect(result.effectiveModel).toBe("gemini-3.5-flash");
       });
 
-      it("keeps non-Gemini-3 models unchanged regardless of headerStyle", () => {
-        const result = prepareAntigravityRequest(
+      it("rejects Gemini 2.x requests before quota fallback", () => {
+        expect(() => prepareAntigravityRequest(
           "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
           { method: "POST", body: JSON.stringify({ contents: [] }) },
           mockAccessToken,
           mockProjectId,
           undefined,
           "antigravity"
-        );
-        expect(result.effectiveModel).toBe("gemini-2.5-flash");
+        )).toThrow("Gemini 2.x models are not supported by this fork; use Gemini 3.x");
       });
     });
   });

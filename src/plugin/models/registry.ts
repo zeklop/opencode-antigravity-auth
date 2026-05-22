@@ -143,20 +143,6 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
     },
   },
   {
-    id: "gemini-2.5-flash",
-    name: "Gemini 2.5 Flash (Gemini CLI)",
-    limit: { context: 1048576, output: 65536 },
-    modalities: DEFAULT_MODALITIES,
-    geminiCli: { backendModel: "gemini-2.5-flash" },
-  },
-  {
-    id: "gemini-2.5-pro",
-    name: "Gemini 2.5 Pro (Gemini CLI)",
-    limit: { context: 1048576, output: 65536 },
-    modalities: DEFAULT_MODALITIES,
-    geminiCli: { backendModel: "gemini-2.5-pro" },
-  },
-  {
     id: "gemini-3-flash-preview",
     name: "Gemini 3 Flash Preview (Gemini CLI)",
     limit: { context: 1048576, output: 65536 },

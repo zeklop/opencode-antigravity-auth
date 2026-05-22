@@ -135,4 +135,13 @@ describe("executeSearch", () => {
       "Bearer bearer-token-xyz",
     );
   });
+
+  it("uses a Gemini 3 model for internal search requests", async () => {
+    const spy = mockFetch(makeResponse("ok"));
+    vi.stubGlobal("fetch", spy);
+    await executeSearch({ query: "q" }, "tok", "proj");
+    const [, init] = spy.mock.calls[0] as [string, RequestInit];
+    const body = JSON.parse(init.body as string);
+    expect(body.model).toBe("gemini-3-flash");
+  });
 });

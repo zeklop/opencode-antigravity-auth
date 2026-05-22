@@ -21,14 +21,16 @@ describe("OPENCODE_MODEL_DEFINITIONS", () => {
       "antigravity-gemini-3-pro",
       "antigravity-gemini-3.1-pro",
       "antigravity-gemini-3.5-flash",
-      "gemini-2.5-flash",
-      "gemini-2.5-pro",
       "gemini-3-flash-preview",
       "gemini-3-pro-preview",
       "gemini-3.1-pro-preview",
       "gemini-3.1-pro-preview-customtools",
       "gemini-3.5-flash",
     ]);
+
+    expect(modelNames).not.toEqual(
+      expect.arrayContaining([expect.stringMatching(/^gemini-2\./)]),
+    );
   });
 
   it("defines Gemini 3 variants for Antigravity models", () => {

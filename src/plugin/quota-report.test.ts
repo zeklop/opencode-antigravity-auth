@@ -60,14 +60,19 @@ describe("renderQuotaReport", () => {
 
     const output = renderQuotaReport(storage, results, now);
 
+    expect(output).toContain("Unified Quota Status (");
+    expect(output).toContain("MSK)");
     expect(output).toContain("Account 1: a***@example.com");
     expect(output).not.toContain("andre@example.com");
-    expect(output).toContain("Gemini CLI live");
+    expect(output).toContain("Antigravity Plugin Cache");
+    expect(output).toContain("██████████░░░░░░░░░░ 50%");
+    expect(output).toContain("Active Rate Limits");
+    expect(output).toContain("Gemini CLI");
     expect(output).toContain("gemini-3.5-flash");
-    expect(output).toContain("Antigravity live");
-    expect(output).toContain("Claude");
-    expect(output).toContain("Cached Antigravity quota: updated 1m ago");
+    expect(output).toContain("Overall Status: WARNING");
+    expect(output).toContain("Pro Tips");
     expect(output).toContain("gemini-antigravity/antigravity-gemini-3-flash");
     expect(output).not.toContain("gemini-cli/gemini-3.5-flash");
+    expect(output).not.toContain("Antigravity live");
   });
 });
