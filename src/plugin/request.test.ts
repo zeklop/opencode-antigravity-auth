@@ -1151,7 +1151,7 @@ it("removes x-api-key header", () => {
         expect(result.effectiveModel).toBe("gemini-3-pro-preview");
       });
 
-      it("transforms gemini-3.1-pro-low to gemini-3.1-pro-preview for gemini-cli headerStyle", () => {
+      it("transforms gemini-3.1-pro-low to bare gemini-3.1-pro for gemini-cli headerStyle", () => {
         const result = prepareAntigravityRequest(
           "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-low:generateContent",
           { method: "POST", body: JSON.stringify({ contents: [] }) },
@@ -1160,7 +1160,19 @@ it("removes x-api-key header", () => {
           undefined,
           "gemini-cli"
         );
-        expect(result.effectiveModel).toBe("gemini-3.1-pro-preview");
+        expect(result.effectiveModel).toBe("gemini-3.1-pro");
+      });
+
+      it("strips legacy gemini-3.1-pro-preview to bare name for gemini-cli headerStyle", () => {
+        const result = prepareAntigravityRequest(
+          "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent",
+          { method: "POST", body: JSON.stringify({ contents: [] }) },
+          mockAccessToken,
+          mockProjectId,
+          undefined,
+          "gemini-cli"
+        );
+        expect(result.effectiveModel).toBe("gemini-3.1-pro");
       });
 
       it("keeps gemini-3.1-pro-preview-customtools unchanged for gemini-cli headerStyle", () => {
@@ -1175,6 +1187,18 @@ it("removes x-api-key header", () => {
         expect(result.effectiveModel).toBe("gemini-3.1-pro-preview-customtools");
       });
 
+      it("transforms gemini-3.5-pro-low to bare gemini-3.5-pro for gemini-cli headerStyle", () => {
+        const result = prepareAntigravityRequest(
+          "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-pro-low:generateContent",
+          { method: "POST", body: JSON.stringify({ contents: [] }) },
+          mockAccessToken,
+          mockProjectId,
+          undefined,
+          "gemini-cli"
+        );
+        expect(result.effectiveModel).toBe("gemini-3.5-pro");
+      });
+
       it("uses bare gemini-3.5-flash for gemini-cli headerStyle", () => {
         const result = prepareAntigravityRequest(
           "https://generativelanguage.googleapis.com/v1beta/models/antigravity-gemini-3.5-flash:generateContent",
@@ -1185,6 +1209,18 @@ it("removes x-api-key header", () => {
           "gemini-cli"
         );
         expect(result.effectiveModel).toBe("gemini-3.5-flash");
+      });
+
+      it("keeps gemini-3.1-flash bare for gemini-cli headerStyle", () => {
+        const result = prepareAntigravityRequest(
+          "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash:generateContent",
+          { method: "POST", body: JSON.stringify({ contents: [] }) },
+          mockAccessToken,
+          mockProjectId,
+          undefined,
+          "gemini-cli"
+        );
+        expect(result.effectiveModel).toBe("gemini-3.1-flash");
       });
 
       it("rejects Gemini 2.x requests before quota fallback", () => {

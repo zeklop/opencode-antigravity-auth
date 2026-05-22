@@ -6,11 +6,11 @@ const packageJson = JSON.parse(
 );
 
 describe("fork package manifest", () => {
-  it("publishes a scoped package with the quota CLI bin", () => {
+  it("publishes a scoped package with the gquota bin", () => {
     expect(packageJson.name).toBe("@zeklop/opencode-antigravity-auth");
     expect(packageJson.publishConfig).toEqual({ access: "public" });
     expect(packageJson.bin).toEqual({
-      "opencode-antigravity-quota": "dist/src/quota-cli.js",
+      gquota: "dist/src/quota-cli.js",
     });
   });
 });

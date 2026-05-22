@@ -62,10 +62,10 @@ describe("runQuotaCli", () => {
 });
 
 describe("isQuotaCliEntry", () => {
-  it("recognizes an npm bin symlink as the quota CLI entrypoint", () => {
+  it("recognizes the gquota npm bin symlink as the quota CLI entrypoint", () => {
     const directory = mkdtempSync(join(tmpdir(), "quota-cli-entry-"));
     const target = join(directory, "quota-cli.js");
-    const entry = join(directory, "opencode-antigravity-quota");
+    const entry = join(directory, "gquota");
 
     try {
       writeFileSync(target, "");

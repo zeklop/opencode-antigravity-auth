@@ -78,7 +78,7 @@ The correct key is `plugin` (singular):
 
 ```json
 {
-  "plugin": ["opencode-antigravity-auth@latest"]
+  "plugin": ["@zeklop/opencode-antigravity-auth@latest"]
 }
 ```
 
@@ -104,18 +104,18 @@ Invalid SemVer
 **macOS / Linux:**
 ```bash
 cd ~/.cache/opencode
-bun add opencode-antigravity-auth@latest
+bun add @zeklop/opencode-antigravity-auth@latest
 ```
 
 **Windows (PowerShell):**
 ```powershell
 Set-Location "$env:USERPROFILE\.cache\opencode"
-bun add opencode-antigravity-auth@latest
+bun add @zeklop/opencode-antigravity-auth@latest
 ```
 
 Then restart OpenCode.
 
-> If you intentionally run beta channel, use `bun add opencode-antigravity-auth@beta` instead.
+> If you intentionally run beta channel, use `bun add @zeklop/opencode-antigravity-auth@beta` instead.
 
 ---
 
@@ -374,7 +374,7 @@ DCP creates synthetic assistant messages that lack thinking blocks. **List this 
 ```json
 {
   "plugin": [
-    "opencode-antigravity-auth@latest",
+    "@zeklop/opencode-antigravity-auth@latest",
     "@tarquinen/opencode-dcp@latest"
   ]
 }

@@ -3,8 +3,8 @@
 # Tests gemini-cli models routing through cloudcode-pa.googleapis.com/v1internal
 #
 # Models tested:
-# 1. google/gemini-2.5-pro
-# 2. google/gemini-2.5-flash
+# 1. google/gemini-3.1-pro
+# 2. google/gemini-3.1-flash
 # 3. google/gemini-3-pro-preview
 # 4. google/gemini-3-flash-preview
 
@@ -82,12 +82,12 @@ echo "  Testing cloudcode-pa.googleapis.com/v1internal routing"
 echo "════════════════════════════════════════════════════════════"
 echo ""
 
-echo "Test 1: google/gemini-2.5-flash"
-test_model "google/gemini-2.5-flash" "gemini-2.5-flash" || true
+echo "Test 1: google/gemini-3.1-flash"
+test_model "google/gemini-3.1-flash" "gemini-3.1-flash" || true
 echo ""
 
-echo "Test 2: google/gemini-2.5-pro"
-test_model "google/gemini-2.5-pro" "gemini-2.5-pro" || true
+echo "Test 2: google/gemini-3.1-pro"
+test_model "google/gemini-3.1-pro" "gemini-3.1-pro" || true
 echo ""
 
 echo "Test 3: google/gemini-3-flash-preview"
@@ -100,8 +100,8 @@ echo ""
 
 # Test 5: Cross-model session (gemini-cli → antigravity)
 echo "Test 5: Cross-model session (gemini-cli → antigravity-gemini)"
-log_info "Step 1: Start with gemini-2.5-flash..."
-timeout 60 opencode run -m google/gemini-2.5-flash \
+log_info "Step 1: Start with gemini-3.1-flash..."
+timeout 60 opencode run -m google/gemini-3.1-flash \
   "Say: SESSION_START" \
   2>&1 > /tmp/gemini-cli-e2e-cross-s1.log || true
 
@@ -140,8 +140,8 @@ if [ -z "$SID" ]; then
   log_fail "Test 6 - No session ID created"
 else
   log_info "Session: $SID"
-  log_info "Step 2: Switch to gemini-2.5-pro..."
-  timeout 60 opencode run -s "$SID" -m google/gemini-2.5-pro \
+  log_info "Step 2: Switch to gemini-3.1-pro..."
+  timeout 60 opencode run -s "$SID" -m google/gemini-3.1-pro \
     "Say: GEMINI_CLI_CONTINUE" \
     2>&1 > /tmp/gemini-cli-e2e-reverse-s2.log || true
   

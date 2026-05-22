@@ -16,7 +16,7 @@ The model registry and current OpenCode configuration still expose Gemini 2.5 mo
 
 ### Quota Report
 
-The packaged `opencode-antigravity-quota` command will render a unified report in the style of the previous local script:
+The packaged `gquota` command will render a unified report in the style of the previous local script:
 
 - MSK timestamp in the heading.
 - Masked account labels.

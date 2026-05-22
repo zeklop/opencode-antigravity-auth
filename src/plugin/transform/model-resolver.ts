@@ -68,6 +68,7 @@ const TIER_REGEX = /-(minimal|low|medium|high)$/;
 const QUOTA_PREFIX_REGEX = /^antigravity-/i;
 const GEMINI_3_PRO_REGEX = /^gemini-3(?:\.\d+)?-pro/i;
 const GEMINI_3_FLASH_REGEX = /^gemini-3(?:\.\d+)?-flash/i;
+const GEMINI_DOTTED_MINOR_REGEX = /^gemini-3\.(?:[1-9]\d*)/i;
 
 // ANTIGRAVITY_ONLY_MODELS removed - all models now default to antigravity
 
@@ -367,8 +368,15 @@ export function resolveModelForHeaderStyle(
       transformedModel = registryModel;
     }
 
+    const usesBareGeminiCliName =
+      GEMINI_DOTTED_MINOR_REGEX.test(transformedModel) &&
+      !/-preview-customtools$/i.test(transformedModel);
+    if (!registryModel && usesBareGeminiCliName) {
+      transformedModel = transformedModel.replace(/-preview$/i, "");
+    }
+
     const hasPreviewSuffix = /-preview($|-)/i.test(transformedModel);
-    if (!registryModel && !hasPreviewSuffix) {
+    if (!registryModel && !usesBareGeminiCliName && !hasPreviewSuffix) {
       transformedModel = `${transformedModel}-preview`;
     }
     

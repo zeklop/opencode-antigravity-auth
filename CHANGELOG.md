@@ -7,6 +7,7 @@
 - Added a fork-local model registry as the source of truth for OpenCode model definitions and resolver backend routes.
 - Added `antigravity-gemini-3.5-flash` with Antigravity backend id `gemini-3.5-flash-low` and default `minimal` thinking.
 - Added `gemini-3.5-flash` as a Gemini CLI route.
+- Added Gemini 3.1 Flash and Gemini 3.5 Pro routes for Antigravity and Gemini CLI.
 - Added runtime ESM import verification to CI.
 - Added a built-in non-interactive quota CLI backed by plugin OAuth storage.
 
@@ -16,6 +17,9 @@
 - Build now runs `script/fix-esm-imports.mjs` after `tsc`, fixing emitted relative ESM imports for Node/OpenCode Desktop.
 - Antigravity version fallback is now `2.0.1`.
 - Gemini 3 wrapped requests now receive default `thinkingConfig` when missing.
+- Gemini CLI routing now keeps dotted-minor Gemini 3.1/3.5 model ids bare instead of appending `-preview`.
+- Config updates now add the scoped fork package instead of the upstream npm package.
+- The packaged quota CLI bin is now named `gquota`.
 - Runtime `tool` import now uses `@opencode-ai/plugin/tool` to avoid the dependency package's extensionless root export.
 
 ## [1.6.0] - 2026-02-20

@@ -157,11 +157,18 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
     geminiCli: { backendModel: "gemini-3-pro-preview" },
   },
   {
-    id: "gemini-3.1-pro-preview",
-    name: "Gemini 3.1 Pro Preview (Gemini CLI)",
+    id: "gemini-3.1-flash",
+    name: "Gemini 3.1 Flash (Gemini CLI)",
+    limit: { context: 1048576, output: 65536 },
+    modalities: DEFAULT_MODALITIES,
+    geminiCli: { backendModel: "gemini-3.1-flash" },
+  },
+  {
+    id: "gemini-3.1-pro",
+    name: "Gemini 3.1 Pro (Gemini CLI)",
     limit: { context: 1048576, output: 65535 },
     modalities: DEFAULT_MODALITIES,
-    geminiCli: { backendModel: "gemini-3.1-pro-preview" },
+    geminiCli: { backendModel: "gemini-3.1-pro" },
   },
   {
     id: "gemini-3.1-pro-preview-customtools",
@@ -178,8 +185,14 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
     geminiCli: { backendModel: "gemini-3.5-flash" },
   },
   {
+    id: "gemini-3.5-pro",
+    name: "Gemini 3.5 Pro (Gemini CLI)",
+    limit: { context: 1048576, output: 65535 },
+    modalities: DEFAULT_MODALITIES,
+    geminiCli: { backendModel: "gemini-3.5-pro" },
+  },
+  {
     id: "antigravity-gemini-3.1-flash",
-    enabled: false,
     name: "Gemini 3.1 Flash (Antigravity)",
     limit: { context: 1048576, output: 65536 },
     modalities: DEFAULT_MODALITIES,
@@ -196,7 +209,6 @@ export const MODEL_REGISTRY: readonly ModelRegistryEntry[] = [
   },
   {
     id: "antigravity-gemini-3.5-pro",
-    enabled: false,
     name: "Gemini 3.5 Pro (Antigravity)",
     limit: { context: 1048576, output: 65535 },
     modalities: DEFAULT_MODALITIES,
