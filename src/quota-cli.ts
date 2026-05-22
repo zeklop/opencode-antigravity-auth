@@ -1,4 +1,7 @@
-import { pathToFileURL } from "node:url";
+#!/usr/bin/env node
+
+import { realpathSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { checkAccountsQuota, type AccountQuotaResult } from "./plugin/quota";
 import { renderQuotaReport } from "./plugin/quota-report";
 import { loadAccounts, type AccountMetadataV3, type AccountStorageV4 } from "./plugin/storage";
@@ -45,12 +48,22 @@ export async function runQuotaCli(
   return 0;
 }
 
-function isDirectRun(): boolean {
-  const entry = process.argv[1];
-  return Boolean(entry && import.meta.url === pathToFileURL(entry).href);
+export function isQuotaCliEntry(
+  entry: string | undefined,
+  moduleUrl: string = import.meta.url,
+): boolean {
+  if (!entry) {
+    return false;
+  }
+
+  try {
+    return realpathSync(entry) === realpathSync(fileURLToPath(moduleUrl));
+  } catch {
+    return false;
+  }
 }
 
-if (isDirectRun()) {
+if (isQuotaCliEntry(process.argv[1])) {
   runQuotaCli()
     .then((exitCode) => {
       process.exitCode = exitCode;

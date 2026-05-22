@@ -1,5 +1,5 @@
 {
-    "name": "opencode-antigravity-auth",
+    "name": "@zeklop/opencode-antigravity-auth",
     "version": "1.6.0",
     "description": "OpenCode OAuth plugin for Antigravity and Gemini models",
     "main": "./dist/index.js",
@@ -7,6 +7,12 @@
     "type": "module",
     "license": "MIT",
     "author": "noefabris",
+    "publishConfig": {
+        "access": "public"
+    },
+    "bin": {
+        "opencode-antigravity-quota": "./dist/src/quota-cli.js"
+    },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/zeklop/opencode-antigravity-auth.git"

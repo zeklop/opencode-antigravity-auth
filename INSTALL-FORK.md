@@ -4,7 +4,8 @@ Use this path when you need the changes maintained in
 `zeklop/opencode-antigravity-auth`.
 
 `opencode-antigravity-auth@latest` is the upstream npm package. It does not
-install this fork. The fork currently runs from a built local checkout.
+install this fork. Until the scoped fork package has its first npm release, the
+fork runs from a built local checkout.
 
 ## Install
 
@@ -88,6 +89,26 @@ npm run build
 
 The `/gquota` command keeps working as long as the checkout path stays the
 same.
+
+## Scoped NPM Path
+
+After the first `@zeklop/opencode-antigravity-auth` npm release, OpenCode can
+install the fork from the scoped package:
+
+```json
+{
+  "plugin": [
+    "@zeklop/opencode-antigravity-auth@latest"
+  ]
+}
+```
+
+The npm quota command uses the package bin instead of a checkout path:
+
+```bash
+mkdir -p ~/.config/opencode/command
+cp templates/opencode-command/gquota-npm.md ~/.config/opencode/command/gquota.md
+```
 
 ## Why Not Git Spec Yet
 

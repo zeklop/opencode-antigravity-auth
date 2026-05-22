@@ -1,5 +1,9 @@
+import { mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
-import { runQuotaCli } from "./quota-cli";
+import { isQuotaCliEntry, runQuotaCli } from "./quota-cli";
 import type { AccountQuotaResult } from "./plugin/quota";
 import type { AccountStorageV4 } from "./plugin/storage";
 
@@ -54,5 +58,22 @@ describe("runQuotaCli", () => {
     expect(exitCode).toBe(0);
     expect(output.join("")).toContain("Account 1: a***@example.com");
     expect(output.join("")).toContain("gemini-3.5-flash");
+  });
+});
+
+describe("isQuotaCliEntry", () => {
+  it("recognizes an npm bin symlink as the quota CLI entrypoint", () => {
+    const directory = mkdtempSync(join(tmpdir(), "quota-cli-entry-"));
+    const target = join(directory, "quota-cli.js");
+    const entry = join(directory, "opencode-antigravity-quota");
+
+    try {
+      writeFileSync(target, "");
+      symlinkSync(target, entry);
+
+      expect(isQuotaCliEntry(entry, pathToFileURL(target).href)).toBe(true);
+    } finally {
+      rmSync(directory, { force: true, recursive: true });
+    }
   });
 });

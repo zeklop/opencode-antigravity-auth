@@ -101,7 +101,7 @@ describe("findPluginEntry", () => {
     const { findPluginEntry } = await import("./checker");
     fsMock.existsSync.mockImplementation((p: string) => p.endsWith("opencode.json"));
     fsMock.readFileSync.mockReturnValue(
-      JSON.stringify({ plugin: ["opencode-antigravity-auth"] }),
+      JSON.stringify({ plugin: ["@zeklop/opencode-antigravity-auth"] }),
     );
     const result = findPluginEntry("/project");
     expect(result).not.toBeNull();
@@ -113,7 +113,7 @@ describe("findPluginEntry", () => {
     const { findPluginEntry } = await import("./checker");
     fsMock.existsSync.mockImplementation((p: string) => p.endsWith("opencode.json"));
     fsMock.readFileSync.mockReturnValue(
-      JSON.stringify({ plugin: ["opencode-antigravity-auth@1.5.0"] }),
+      JSON.stringify({ plugin: ["@zeklop/opencode-antigravity-auth@1.5.0"] }),
     );
     const result = findPluginEntry("/project");
     expect(result).not.toBeNull();
@@ -121,11 +121,23 @@ describe("findPluginEntry", () => {
     expect(result!.pinnedVersion).toBe("1.5.0");
   });
 
+  it("returns entry for the scoped fork package", async () => {
+    const { findPluginEntry } = await import("./checker");
+    fsMock.existsSync.mockImplementation((p: string) => p.endsWith("opencode.json"));
+    fsMock.readFileSync.mockReturnValue(
+      JSON.stringify({ plugin: ["@zeklop/opencode-antigravity-auth@1.6.0"] }),
+    );
+    const result = findPluginEntry("/project");
+    expect(result).not.toBeNull();
+    expect(result!.isPinned).toBe(true);
+    expect(result!.pinnedVersion).toBe("1.6.0");
+  });
+
   it("returns isPinned=false for @latest entry", async () => {
     const { findPluginEntry } = await import("./checker");
     fsMock.existsSync.mockImplementation((p: string) => p.endsWith("opencode.json"));
     fsMock.readFileSync.mockReturnValue(
-      JSON.stringify({ plugin: ["opencode-antigravity-auth@latest"] }),
+      JSON.stringify({ plugin: ["@zeklop/opencode-antigravity-auth@latest"] }),
     );
     const result = findPluginEntry("/project");
     expect(result!.isPinned).toBe(false);

@@ -12,6 +12,7 @@
 
 ### Changed
 
+- Fork npm metadata now targets the scoped `@zeklop/opencode-antigravity-auth` package.
 - Build now runs `script/fix-esm-imports.mjs` after `tsc`, fixing emitted relative ESM imports for Node/OpenCode Desktop.
 - Antigravity version fallback is now `2.0.1`.
 - Gemini 3 wrapped requests now receive default `thinkingConfig` when missing.

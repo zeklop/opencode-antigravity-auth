@@ -1,8 +1,9 @@
 import * as path from "node:path";
 import * as os from "node:os";
 
-export const PACKAGE_NAME = "opencode-antigravity-auth";
-export const NPM_REGISTRY_URL = `https://registry.npmjs.org/-/package/${PACKAGE_NAME}/dist-tags`;
+export const PACKAGE_NAME = "@zeklop/opencode-antigravity-auth";
+export const LOCAL_DEV_PATH_MARKER = "opencode-antigravity-auth";
+export const NPM_REGISTRY_URL = `https://registry.npmjs.org/-/package/${encodeURIComponent(PACKAGE_NAME)}/dist-tags`;
 export const NPM_FETCH_TIMEOUT = 5000;
 
 function getCacheDir(): string {

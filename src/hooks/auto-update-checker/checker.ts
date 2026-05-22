@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import type { NpmDistTags, OpencodeConfig, PackageJson, UpdateCheckResult } from "./types";
 import {
   PACKAGE_NAME,
+  LOCAL_DEV_PATH_MARKER,
   NPM_REGISTRY_URL,
   NPM_FETCH_TIMEOUT,
   INSTALLED_PACKAGE_JSON,
@@ -41,7 +42,7 @@ export function getLocalDevPath(directory: string): string | null {
       const plugins = config.plugin ?? [];
 
       for (const entry of plugins) {
-        if (entry.startsWith("file://") && entry.includes(PACKAGE_NAME)) {
+        if (entry.startsWith("file://") && entry.includes(LOCAL_DEV_PATH_MARKER)) {
           try {
             return fileURLToPath(entry);
           } catch {
@@ -122,7 +123,7 @@ export function findPluginEntry(directory: string): PluginEntryInfo | null {
           const isPinned = pinnedVersion !== "latest";
           return { entry, isPinned, pinnedVersion: isPinned ? pinnedVersion : null, configPath };
         }
-        if (entry.startsWith("file://") && entry.includes(PACKAGE_NAME)) {
+        if (entry.startsWith("file://") && entry.includes(LOCAL_DEV_PATH_MARKER)) {
           return { entry, isPinned: false, pinnedVersion: null, configPath };
         }
       }
