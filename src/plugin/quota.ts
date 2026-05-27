@@ -222,7 +222,7 @@ async function fetchGeminiCliQuota(
   // Use Gemini CLI user-agent to get CLI quota buckets (not Antigravity buckets)
   const platform = process.platform || "darwin";
   const arch = process.arch || "arm64";
-  const geminiCliUserAgent = `GeminiCLI/1.0.0/gemini-2.5-pro (${platform}; ${arch})`;
+  const geminiCliUserAgent = `GeminiCLI/1.0.0/gemini-3.5-pro (${platform}; ${arch})`;
 
   const body = projectId ? { project: projectId } : {};
   
@@ -262,9 +262,9 @@ export function aggregateGeminiCliQuota(response: RetrieveUserQuotaResponse): Ge
       continue;
     }
     
-    // Filter out models outside this fork's supported Gemini 3 surface.
+    // Filter out models outside this fork's supported Gemini surface.
     const modelId = bucket.modelId;
-    const isRelevantModel = modelId.startsWith("gemini-3");
+    const isRelevantModel = modelId.startsWith("gemini-3") || modelId.startsWith("gemini-2.5");
     
     if (!isRelevantModel) {
       continue;

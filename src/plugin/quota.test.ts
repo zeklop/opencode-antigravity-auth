@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { aggregateGeminiCliQuota } from "./quota";
 
 describe("aggregateGeminiCliQuota", () => {
-  it("keeps Gemini 3 dot-version quota buckets", () => {
+  it("keeps Gemini 3 and Gemini 2.5 quota buckets", () => {
     const quota = aggregateGeminiCliQuota({
       buckets: [
         {
@@ -17,6 +17,7 @@ describe("aggregateGeminiCliQuota", () => {
     });
 
     expect(quota.models.map((model) => model.modelId)).toEqual([
+      "gemini-2.5-flash",
       "gemini-3.5-flash",
     ]);
   });
