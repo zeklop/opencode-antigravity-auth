@@ -117,9 +117,42 @@ function formatCachedQuota(account: AccountMetadataV3, now: number): string[] {
     return [...lines, "  unavailable"];
   }
 
+  // Find active rate limits that apply to our quota groups
+  const activeLimits = getActiveRateLimits(account, now);
+
   for (const [group, label] of QUOTA_LABELS) {
-    const quota = account.cachedQuota[group];
-    if (quota) {
+    const cached = account.cachedQuota[group];
+    if (cached) {
+      // Create a copy of the quota metadata to apply dynamic overrides
+      const quota = { ...cached };
+      
+      // Determine if there are active rate limits that map to this group.
+      // Rules:
+      // - "claude" maps to any rate limit key containing "claude"
+      // - "gemini-flash" maps to rate limits containing "gemini-3.5-flash", "gemini-3-flash", "gemini-3.1-flash"
+      // - "gemini-pro" maps to rate limits containing "gemini-3.1-pro", "gemini-3-pro", "gemini-3.5-pro"
+      let maxResetTime = 0;
+      let hasLimit = false;
+
+      for (const [key, resetTime] of activeLimits) {
+        const lowerKey = key.toLowerCase();
+        if (group === "claude" && lowerKey.includes("claude")) {
+          hasLimit = true;
+          maxResetTime = Math.max(maxResetTime, resetTime);
+        } else if (group === "gemini-flash" && (lowerKey.includes("flash") || lowerKey.includes("flash-lite"))) {
+          hasLimit = true;
+          maxResetTime = Math.max(maxResetTime, resetTime);
+        } else if (group === "gemini-pro" && lowerKey.includes("pro")) {
+          hasLimit = true;
+          maxResetTime = Math.max(maxResetTime, resetTime);
+        }
+      }
+
+      if (hasLimit) {
+        quota.remainingFraction = 0;
+        quota.resetTime = new Date(maxResetTime).toISOString();
+      }
+
       lines.push(...formatQuotaLine(label, quota, now));
     }
   }
