@@ -1213,8 +1213,9 @@ function sleep(ms: number, signal?: AbortSignal | null): Promise<void> {
 export const createAntigravityPlugin = (providerId: string) => async (
   { client, directory }: PluginContext,
 ): Promise<PluginResult> => {
+  const targetDir = directory || process.cwd();
   // Load configuration from files and environment variables
-  const config = loadConfig(directory);
+  const config = loadConfig(targetDir);
   initRuntimeConfig(config);
 
   // Cached getAuth function for tool access
@@ -1452,8 +1453,9 @@ export const createAntigravityPlugin = (providerId: string) => async (
       return {
         apiKey: "",
         async fetch(input, init) {
+          const originalFetch = (provider as any)?.fetch ?? globalThis.fetch;
           if (!isGenerativeLanguageRequest(input)) {
-            return fetch(input, init);
+            return originalFetch(input, init);
           }
 
           const latestAuth = await getAuth();
@@ -2544,7 +2546,7 @@ export const createAntigravityPlugin = (providerId: string) => async (
           );
 
           // CLI flow (`opencode auth login`) passes an inputs object.
-          if (inputs) {
+          if (inputs && process.stdout?.isTTY && process.stdin?.isTTY) {
             const accounts: Array<Extract<AntigravityTokenExchangeResult, { type: "success" }>> = [];
             const noBrowser = inputs.noBrowser === "true" || inputs["no-browser"] === "true";
             const useManualMode = noBrowser || shouldSkipLocalServer();

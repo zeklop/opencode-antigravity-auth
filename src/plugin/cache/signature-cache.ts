@@ -430,11 +430,17 @@ export class SignatureCache {
         this.saveToDisk();
       }
     }, this.writeIntervalMs);
+    if (this.writeTimer && typeof this.writeTimer.unref === "function") {
+      this.writeTimer.unref();
+    }
 
     // Periodic memory cleanup (every 30 minutes)
     this.cleanupTimer = setInterval(() => {
       this.cleanupExpired();
     }, 30 * 60 * 1000);
+    if (this.cleanupTimer && typeof this.cleanupTimer.unref === "function") {
+      this.cleanupTimer.unref();
+    }
   }
 
   /**
