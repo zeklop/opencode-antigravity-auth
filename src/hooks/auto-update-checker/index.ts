@@ -47,7 +47,7 @@ export function createAutoUpdateCheckerHook(
 
       hasChecked = true;
 
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         const localDevVersion = getLocalDevVersion(directory);
 
         if (localDevVersion) {
@@ -62,6 +62,9 @@ export function createAutoUpdateCheckerHook(
           logAutoUpdate(`Background update check failed: ${err}`);
         });
       }, 0);
+      if (typeof timer.unref === "function") {
+        timer.unref();
+      }
     },
   };
 }

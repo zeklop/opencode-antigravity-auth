@@ -248,7 +248,7 @@ export class ProactiveRefreshQueue {
     });
 
     // Run initial check after a short delay (let things settle)
-    setTimeout(() => {
+    const initialTimer = setTimeout(() => {
       if (this.state.isRunning) {
         this.runRefreshCheck().catch((error) => {
           log.error("Initial check failed", {
@@ -257,6 +257,9 @@ export class ProactiveRefreshQueue {
         });
       }
     }, 5000);
+    if (typeof initialTimer.unref === "function") {
+      initialTimer.unref();
+    }
 
     // Set up periodic checks
     this.state.intervalHandle = setInterval(() => {
@@ -266,6 +269,9 @@ export class ProactiveRefreshQueue {
         });
       });
     }, intervalMs);
+    if (this.state.intervalHandle && typeof this.state.intervalHandle.unref === "function") {
+      this.state.intervalHandle.unref();
+    }
   }
 
   /**

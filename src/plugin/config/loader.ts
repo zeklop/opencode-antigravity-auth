@@ -46,7 +46,8 @@ export function getUserConfigPath(): string {
 /**
  * Get the project-level config file path.
  */
-export function getProjectConfigPath(directory: string): string {
+export function getProjectConfigPath(directory?: string): string | null {
+  if (!directory) return null;
   return join(directory, ".opencode", "antigravity.json");
 }
 
@@ -118,7 +119,7 @@ function mergeConfigs(
  * @param directory - The project directory (for project-level config)
  * @returns Fully resolved configuration
  */
-export function loadConfig(directory: string): AntigravityConfig {
+export function loadConfig(directory?: string): AntigravityConfig {
   // Start with defaults
   let config: AntigravityConfig = { ...DEFAULT_CONFIG };
 
@@ -130,10 +131,14 @@ export function loadConfig(directory: string): AntigravityConfig {
   }
 
   // Load project config file (if exists) - overrides user config
-  const projectConfigPath = getProjectConfigPath(directory);
-  const projectConfig = loadConfigFile(projectConfigPath);
-  if (projectConfig) {
-    config = mergeConfigs(config, projectConfig);
+  if (directory) {
+    const projectConfigPath = getProjectConfigPath(directory);
+    if (projectConfigPath) {
+      const projectConfig = loadConfigFile(projectConfigPath);
+      if (projectConfig) {
+        config = mergeConfigs(config, projectConfig);
+      }
+    }
   }
 
   return config;

@@ -753,8 +753,17 @@ const STREAM_ACTION = "streamGenerateContent";
 /**
  * Detects requests headed to the Google Generative Language API so we can intercept them.
  */
-export function isGenerativeLanguageRequest(input: RequestInfo): input is string {
-  return typeof input === "string" && input.includes("generativelanguage.googleapis.com");
+export function isGenerativeLanguageRequest(input: RequestInfo | URL): boolean {
+  if (typeof input === "string") {
+    return input.includes("generativelanguage.googleapis.com");
+  }
+  if (input instanceof URL) {
+    return input.href.includes("generativelanguage.googleapis.com");
+  }
+  if (typeof input === "object" && input !== null && "url" in input) {
+    return typeof (input as Request).url === "string" && (input as Request).url.includes("generativelanguage.googleapis.com");
+  }
+  return false;
 }
 
 /**
@@ -822,7 +831,8 @@ export function prepareAntigravityRequest(
   // that are not required for Antigravity/Gemini CLI OAuth requests.
   headers.delete("x-goog-user-project");
 
-  const match = input.match(/\/models\/([^:]+):(\w+)/);
+  const inputUrl = typeof input === "string" ? input : (input instanceof URL ? input.href : (input as Request).url);
+  const match = inputUrl.match(/\/models\/([^:]+):(\w+)/);
   if (!match) {
     return {
       request: input,
